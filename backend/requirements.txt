@@ -1,0 +1,10 @@
+python-dotenv
+langchain_community
+unstructured[md]
+langchain-openai
+fastapi
+uvicorn
+fastapi-cors
+langchain_qdrant
+qdrant_client
+debugpy

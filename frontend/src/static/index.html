@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat Application</title>
+<style>
+       body {
+           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+           margin: 0;
+           padding: 0;
+           height: 100vh;
+           display: flex;
+           background-color: #f5f7fb;
+       }
+       .container {
+           display: flex;
+           width: 100%;
+           height: 100%;
+       }
+       .content {
+           flex: 7;
+           padding: 20px;
+           overflow-y: auto;
+       }
+       .chat-container {
+           flex: 3;
+           background-color: white;
+           border-left: 1px solid #e1e4e8;
+           display: flex;
+           flex-direction: column;
+           height: 100%;
+       }
+       .chat-header {
+           padding: 15px;
+           background-color: #4f46e5;
+           color: white;
+           font-weight: bold;
+           border-bottom: 1px solid #e1e4e8;
+       }
+       .messages {
+           flex: 1;
+           overflow-y: auto;
+           padding: 15px;
+       }
+       .message {
+           margin-bottom: 15px;
+           max-width: 85%;
+           word-wrap: break-word;
+       }
+       .message.user {
+           margin-left: auto;
+           background-color: #4f46e5;
+           color: white;
+           border-radius: 15px 15px 0 15px;
+           padding: 10px 15px;
+       }
+       .message.bot {
+           background-color: #f0f0f0;
+           border-radius: 15px 15px 15px 0;
+           padding: 10px 15px;
+       }
+       .input-area {
+           padding: 15px;
+           border-top: 1px solid #e1e4e8;
+           display: flex;
+       }
+       .message-input {
+           flex: 1;
+           padding: 10px 15px;
+           border: 1px solid #e1e4e8;
+           border-radius: 20px;
+           font-size: 14px;
+           outline: none;
+       }
+       .send-button {
+           margin-left: 10px;
+           background-color: #4f46e5;
+           color: white;
+           border: none;
+           border-radius: 20px;
+           padding: 10px 20px;
+           cursor: pointer;
+           font-weight: bold;
+       }
+       .welcome-content {
+           background-color: white;
+           border-radius: 8px;
+           padding: 20px;
+           box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+       }
+       h1 {
+           color: #4f46e5;
+       }
+       .timestamp {
+           font-size: 11px;
+           color: #9ca3af;
+           margin-top: 5px;
+           text-align: right;
+       }
+       .loading {
+           display: inline-block;
+           width: 20px;
+           height: 20px;
+           border: 3px solid rgba(79, 70, 229, 0.3);
+           border-radius: 50%;
+           border-top-color: #4f46e5;
+           animation: spin 1s ease-in-out infinite;
+       }
+       @keyframes spin {
+           to {
+               transform: rotate(360deg);
+           }
+       }
+</style>
+</head>
+<body>
+<div class="container">
+<div class="content">
+<div class="welcome-content">
+<h1>Welcome to the Chat Application</h1>
+<p>This is a simple chat UI used with the Sample RAG Solution</p>
+<P>It is intended as a learning tool for developers to get started with RAG applications</p>
+<img src="rag.jpg" alt="Retrieval Augmented Generation" style="width: 100%; margin-top: 20px;">
+</div>
+</div>
+<div class="chat-container">
+<div class="chat-header">
+               Chat Interface
+</div>
+<div class="messages" id="messages">
+<div class="message bot">
+                   Hello! How can I help you today?
+<div class="timestamp">Just now</div>
+</div>
+</div>
+<div class="input-area">
+<input type="text" class="message-input" id="message-input" placeholder="Type your message..." autofocus>
+<button class="send-button" id="send-button">Send</button>
+</div>
+</div>
+</div>
+<script>
+       document.addEventListener('DOMContentLoaded', function() {
+           const messagesContainer = document.getElementById('messages');
+           const messageInput = document.getElementById('message-input');
+           const sendButton = document.getElementById('send-button');
+           // Function to add a new message to the chat
+           function addMessage(message, isUser = false) {
+               const messageElement = document.createElement('div');
+               messageElement.classList.add('message');
+               messageElement.classList.add(isUser ? 'user' : 'bot');
+               messageElement.innerHTML = message + '<div class="timestamp">Just now</div>';
+               messagesContainer.appendChild(messageElement);
+               // Scroll to the bottom of the messages container
+               messagesContainer.scrollTop = messagesContainer.scrollHeight;
+           }
+           // Function to add a loading indicator
+           function addLoadingIndicator() {
+               const loadingElement = document.createElement('div');
+               loadingElement.classList.add('message', 'bot');
+               loadingElement.innerHTML = '<div class="loading"></div>';
+loadingElement.id = 'loading-indicator';
+               messagesContainer.appendChild(loadingElement);
+               messagesContainer.scrollTop = messagesContainer.scrollHeight;
+           }
+           // Function to remove loading indicator
+           function removeLoadingIndicator() {
+               const loadingElement = document.getElementById('loading-indicator');
+               if (loadingElement) {
+                   messagesContainer.removeChild(loadingElement);
+               }
+           }
+           // Function to send message to backend
+           async function sendMessageToBackend(message) {
+               try {
+                   addLoadingIndicator();
+                   const response = await fetch('http://localhost:8000/question', {
+                       method: 'POST',
+                       headers: {
+                           'Content-Type': 'application/json'
+                       },
+                       body: JSON.stringify({ question: message })
+                   });
+                   removeLoadingIndicator();
+                   if (response.ok) {
+                       const data = await response.json();
+                       addMessage(data.answer || "I received your message, but couldn't generate a proper response.");
+                   } else {
+                       addMessage("Sorry, there was an error communicating with the server. Please try again later.");
+                   }
+               } catch (error) {
+                   removeLoadingIndicator();
+                   addMessage("Network error: Unable to reach the server. Please check your connection and try again.");
+                   console.error('Error:', error);
+               }
+           }
+           // Event listener for send button
+           sendButton.addEventListener('click', function() {
+               const message = messageInput.value.trim();
+               if (message) {
+                   addMessage(message, true);
+                   messageInput.value = '';
+                   sendMessageToBackend(message);
+               }
+           });
+           // Event listener for Enter key
+           messageInput.addEventListener('keypress', function(e) {
+               if (e.key === 'Enter') {
+                   const message = messageInput.value.trim();
+                   if (message) {
+                       addMessage(message, true);
+                       messageInput.value = '';
+                       sendMessageToBackend(message);
+                   }
+               }
+           });
+       });
+</script>
+</body>
+</html>

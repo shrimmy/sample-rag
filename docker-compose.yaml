@@ -1,0 +1,42 @@
+services:
+  restaurant-assistant:
+    build: ./backend
+    container_name: restaurant-assistant
+    restart: unless-stopped
+    env_file:
+      - .env
+    command: uvicorn src.main:app --host 0.0.0.0 --port 80 --reload
+    environment:
+      - DATA_FOLDER=/var/data
+      - VECTORSTORE_TYPE=QDRANT
+      - REMOTE_DEBUG=true
+    ports:
+      - "8000:80"
+      - "5678:5678"
+    volumes:
+      - ./data/menus:/var/data
+      - ./backend/src:/app/src
+
+  restaurant-ui:
+    build: ./frontend
+    container_name: restaurant-ui
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    volumes:
+      - ./frontend/src:/app/src 
+    depends_on:
+      - restaurant-assistant
+
+  qdrant:
+    image: qdrant/qdrant
+    container_name: qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant-data:/var/lib/qdrant
+
+volumes:
+  qdrant-data:
+    driver: local
