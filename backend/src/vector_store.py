@@ -17,6 +17,7 @@ class EmbeddingsModelConfig(BaseModel):
     azure_endpoint: str
     openai_api_key: str
 
+# factory method for creating vector stores
 def init_vector_store(vector_store_type: VectorStoreType, embeddings_model_config: EmbeddingsModelConfig):
     
     embeddings = AzureOpenAIEmbeddings(
@@ -27,6 +28,7 @@ def init_vector_store(vector_store_type: VectorStoreType, embeddings_model_confi
     )
 
     # return the appropriate vector store
+    # see this for other vector stores: https://python.langchain.com/docs/modules/data_connection/vectorstores
     if vector_store_type == VectorStoreType.QDRANT.value:
         
         #### QDRANT VECTOR STORE ####

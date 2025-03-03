@@ -21,10 +21,12 @@ class DefaultIndexer(Indexer):
     # add documents to the index
     def add(self, file_Path: str):
         # load documents from file
+        # see this for other loaders: https://python.langchain.com/v0.1/docs/modules/data_connection/document_loaders/
         loader = UnstructuredMarkdownLoader(file_path=file_Path)
         documents = loader.load()
 
         # split all documents into chunks
+        # see this for other splitters: https://python.langchain.com/v0.1/docs/modules/data_connection/document_transformers/
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
         all_chunks = text_splitter.split_documents(documents)
 
