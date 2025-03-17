@@ -26,9 +26,15 @@ For this sample, we will be indexing markdown files that contain menu informatio
 ### Create your own knowledge files
 - Prompt: `Create a markdown file with the following content: Name of the Restaurant, a menu with descriptions and prices in USD. Also add a story about the restaurant, no more than 2 paragraphs.`
 
+## Customize and make it your own
+- Change the Vector Store - https://python.langchain.com/docs/integrations/vectorstores/ 
+- Change the Document Loader -  https://python.langchain.com/docs/how_to/#document-loaders
+- Change the Text Splitter - https://python.langchain.com/docs/how_to/#text-splitters
+- Add Memory - https://python.langchain.com/docs/how_to/chatbots_memory/
+- Add Tools (Utilities) - https://python.langchain.com/docs/how_to/custom_tools/
+
 
 ## TODO:
-- Look into Poetry for dependency management
 - Upsert documents in knowledge index
 - Add delete functionality
 - Add EntraID
